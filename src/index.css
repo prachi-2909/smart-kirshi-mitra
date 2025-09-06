@@ -2,41 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* KrishiMitra Design System - Farmer-friendly colors and 3D effects
+All colors MUST be HSL for consistency and theming.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors - Soft, nature-inspired */
+    --background: 120 15% 97%;
+    --foreground: 120 20% 15%;
 
+    /* Card system with soft shadows */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 120 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 120 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Deep forest green */
+    --primary: 140 60% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 140 70% 45%;
+    --primary-light: 140 50% 35%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Earthy brown */
+    --secondary: 30 40% 85%;
+    --secondary-foreground: 30 60% 20%;
+    --secondary-dark: 30 50% 30%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted - Sage green */
+    --muted: 120 20% 90%;
+    --muted-foreground: 120 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Golden yellow */
+    --accent: 45 85% 70%;
+    --accent-foreground: 30 60% 20%;
+    --accent-glow: 45 90% 60%;
+
+    /* Success - Fresh green */
+    --success: 120 70% 40%;
+    --success-foreground: 0 0% 98%;
+    --success-light: 120 60% 85%;
+
+    /* Warning - Warm orange */
+    --warning: 35 85% 60%;
+    --warning-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 120 25% 85%;
+    --input: 120 25% 92%;
+    --ring: 140 60% 25%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
+
+    /* 3D Effect Colors */
+    --shadow-primary: 140 60% 15%;
+    --shadow-soft: 120 20% 80%;
+    --shadow-glow: 140 70% 45%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(140 60% 25%), hsl(140 70% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(140 60% 25%), hsl(120 70% 40%), hsl(45 85% 70%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(120 15% 95%));
+    --gradient-soft: linear-gradient(180deg, hsl(120 20% 98%), hsl(120 15% 94%));
+
+    /* 3D Shadows */
+    --shadow-3d: 0 8px 32px hsl(var(--shadow-primary) / 0.15), 0 4px 16px hsl(var(--shadow-soft) / 0.2);
+    --shadow-glow-effect: 0 0 40px hsl(var(--shadow-glow) / 0.3);
+    --shadow-elevated: 0 12px 48px hsl(var(--shadow-primary) / 0.2), 0 6px 24px hsl(var(--shadow-soft) / 0.25);
+
+    /* Animation timing */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -94,12 +135,111 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes voice-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+@keyframes floating {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes slide-up {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer components {
+  /* 3D Effect Classes */
+  .card-3d {
+    @apply bg-gradient-to-br from-white to-muted/50 shadow-[var(--shadow-3d)] border border-border/50;
+    transform: translateZ(0);
+    transition: var(--transition-smooth);
+  }
+  
+  .card-3d:hover {
+    @apply shadow-[var(--shadow-elevated)];
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  .glow-effect {
+    position: relative;
+  }
+  
+  .glow-effect::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--gradient-primary);
+    border-radius: inherit;
+    z-index: -1;
+    filter: blur(8px);
+    opacity: 0;
+    transition: var(--transition-smooth);
+  }
+  
+  .glow-effect:hover::before {
+    opacity: 0.7;
+  }
+
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .card-gradient {
+    background: var(--gradient-card);
+  }
+
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Voice Animation */
+  .voice-pulse {
+    animation: voice-pulse 2s infinite;
+  }
+
+  .floating {
+    animation: floating 3s ease-in-out infinite;
+  }
+
+  .slide-up {
+    animation: slide-up 0.5s ease-out;
+  }
+
+  .fade-in {
+    animation: fade-in 0.6s ease-out;
+  }
+}
+
+@layer utilities {
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-bounce {
+    transition: var(--transition-bounce);
   }
 }
