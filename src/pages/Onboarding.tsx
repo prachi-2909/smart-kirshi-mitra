@@ -12,7 +12,7 @@ import { Globe, Mic, Sprout, Users } from 'lucide-react';
 const Onboarding = () => {
   const navigate = useNavigate();
   const { language, setLanguage, translate } = useLanguage();
-  const { speak } = useVoice();
+  const { speak, setCurrentLanguage } = useVoice();
   const [step, setStep] = useState(1);
   const [farmDetails, setFarmDetails] = useState({
     farmSize: '',
@@ -29,7 +29,8 @@ const Onboarding = () => {
 
   const handleLanguageSelect = (lang: Language) => {
     setLanguage(lang);
-    speak(translate('welcome'));
+    setCurrentLanguage(lang);
+    speak(translate('welcome'), lang);
     setTimeout(() => setStep(2), 1000);
   };
 

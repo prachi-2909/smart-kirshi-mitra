@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/context/LanguageContext';
 import { useVoice } from '@/context/VoiceContext';
-import { ArrowLeft, Mic, Send, Bot, User, Volume2 } from 'lucide-react';
+import { ArrowLeft, Mic, Send, Bot, User, Volume2, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Message {
@@ -16,7 +16,7 @@ interface Message {
 
 const ChatBot = () => {
   const navigate = useNavigate();
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
   const { isListening, startListening, stopListening, speak, isSupported } = useVoice();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -76,6 +76,11 @@ const ChatBot = () => {
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botResponse]);
+      
+      // Speak bot response in user's language
+      setTimeout(() => {
+        speak(botResponse.text, language);
+      }, 1200);
     }, 1000);
 
     setInputText('');
@@ -93,11 +98,11 @@ const ChatBot = () => {
   };
 
   const handleSpeak = (text: string) => {
-    speak(text);
+    speak(text, language);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
+    <div className="min-h-screen bg-gradient-soft flex flex-col">
       {/* Header */}
       <div className="bg-gradient-primary text-white p-4 shadow-3d">
         <div className="flex items-center gap-4">
@@ -110,10 +115,10 @@ const ChatBot = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <Bot className="w-8 h-8 animate-floating" />
+            <MessageCircle className="w-8 h-8 animate-floating" />
             <div>
-              <h1 className="text-xl font-bold">AI Farming Assistant</h1>
-              <p className="text-sm text-white/80">Always here to help you</p>
+              <h1 className="text-xl font-bold">{translate('chat')}</h1>
+              <p className="text-sm text-white/80">AI-powered farming assistant</p>
             </div>
           </div>
         </div>

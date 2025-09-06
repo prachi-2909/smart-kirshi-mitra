@@ -51,8 +51,31 @@ const PestDetection = () => {
   };
 
   const handleCameraCapture = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+    // Request camera permission and show camera interface
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment', // Use back camera
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      }).then(() => {
+        // Camera access granted, trigger file input
+        if (fileInputRef.current) {
+          fileInputRef.current.click();
+        }
+      }).catch((err) => {
+        console.error('Camera access denied:', err);
+        // Fallback to file input
+        if (fileInputRef.current) {
+          fileInputRef.current.click();
+        }
+      });
+    } else {
+      // Fallback for browsers without camera API
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
     }
   };
 
@@ -108,10 +131,20 @@ const PestDetection = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="text-center text-muted-foreground mb-4">
+                <p className="mb-2">📱 For best results:</p>
+                <div className="text-sm space-y-1">
+                  <p>• Use natural lighting (avoid flash)</p>
+                  <p>• Focus on affected plant parts</p>
+                  <p>• Keep the camera steady</p>
+                  <p>• Include surrounding area for context</p>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   size="lg"
-                  className="flex-col h-24 glow-effect transition-bounce"
+                  className="flex-col h-24 glow-effect transition-bounce hover:scale-105"
                   onClick={handleCameraCapture}
                 >
                   <Camera className="w-8 h-8 mb-2" />
@@ -121,7 +154,7 @@ const PestDetection = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="flex-col h-24 glow-effect transition-bounce"
+                  className="flex-col h-24 glow-effect transition-bounce hover:scale-105"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="w-8 h-8 mb-2" />
@@ -161,28 +194,37 @@ const PestDetection = () => {
                     <div className="text-center text-white">
                       <Scan className="w-12 h-12 mx-auto mb-2 animate-voice-pulse" />
                       <p>Analyzing image...</p>
+                      <p className="text-sm opacity-75">AI detecting pest patterns</p>
                     </div>
                   </div>
                 )}
               </div>
               
-              <div className="mt-4 flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={resetDetection}
-                  className="flex-1"
-                >
-                  Try Another Image
-                </Button>
-                {!isAnalyzing && !result && (
+              <div className="mt-4 space-y-3">
+                {/* GPS Location Indicator */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 bg-muted/30 rounded">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span>Location: Pune, MH (GPS enabled for future hardware integration)</span>
+                </div>
+                
+                <div className="flex gap-2">
                   <Button
-                    onClick={analyzeImage}
-                    className="flex-1 glow-effect"
+                    variant="outline"
+                    onClick={resetDetection}
+                    className="flex-1"
                   >
-                    <Scan className="w-4 h-4 mr-2" />
-                    Analyze
+                    Try Another Image
                   </Button>
-                )}
+                  {!isAnalyzing && !result && (
+                    <Button
+                      onClick={analyzeImage}
+                      className="flex-1 glow-effect"
+                    >
+                      <Scan className="w-4 h-4 mr-2" />
+                      Analyze
+                    </Button>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

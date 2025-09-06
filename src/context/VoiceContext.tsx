@@ -6,8 +6,9 @@ interface VoiceContextType {
   isSupported: boolean;
   startListening: (onResult: (text: string) => void) => void;
   stopListening: () => void;
-  speak: (text: string) => void;
+  speak: (text: string, language?: string) => void;
   isSpeaking: boolean;
+  setCurrentLanguage: (language: string) => void;
 }
 
 const VoiceContext = createContext<VoiceContextType | undefined>(undefined);
@@ -17,6 +18,7 @@ export const VoiceProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   const { language } = useLanguage();
+  const [currentLanguage, setCurrentLanguage] = useState(language);
 
   const isSupported = typeof window !== 'undefined' && 
     ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
@@ -38,7 +40,7 @@ export const VoiceProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     
     newRecognition.continuous = false;
     newRecognition.interimResults = false;
-    newRecognition.lang = languageMap[language] || 'en-US';
+    newRecognition.lang = languageMap[currentLanguage] || 'en-US';
 
     newRecognition.onstart = () => setIsListening(true);
     newRecognition.onend = () => setIsListening(false);
@@ -55,7 +57,7 @@ export const VoiceProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     setRecognition(newRecognition);
     newRecognition.start();
-  }, [isSupported, language, languageMap]);
+  }, [isSupported, currentLanguage, languageMap]);
 
   const stopListening = useCallback(() => {
     if (recognition) {
@@ -64,17 +66,22 @@ export const VoiceProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [recognition]);
 
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((text: string, language?: string) => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = languageMap[language] || 'en-US';
+      const langCode = language || currentLanguage;
+      utterance.lang = languageMap[langCode] || 'en-US';
       
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       
       speechSynthesis.speak(utterance);
     }
-  }, [language, languageMap]);
+  }, [currentLanguage, languageMap]);
+
+  const setLanguageCallback = useCallback((language: string) => {
+    setCurrentLanguage(language as any);
+  }, []);
 
   return (
     <VoiceContext.Provider value={{
@@ -83,7 +90,8 @@ export const VoiceProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       startListening,
       stopListening,
       speak,
-      isSpeaking
+      isSpeaking,
+      setCurrentLanguage: setLanguageCallback
     }}>
       {children}
     </VoiceContext.Provider>

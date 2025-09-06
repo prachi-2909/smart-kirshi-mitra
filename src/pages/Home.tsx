@@ -125,7 +125,17 @@ const Home = () => {
                     <div className="text-3xl font-bold">{weather.current.temperature}°C</div>
                     <div className="text-muted-foreground">{weather.current.condition}</div>
                   </div>
-                  {getWeatherIcon(weather.current.condition)}
+                  <div className="flex items-center gap-3">
+                    {getWeatherIcon(weather.current.condition)}
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs bg-white/20 border-white/30 text-white hover:bg-white/30"
+                      onClick={() => navigate('/weather-details')}
+                    >
+                      View Details
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-4 gap-2">
@@ -192,6 +202,16 @@ const Home = () => {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="mt-4 text-center">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="text-xs"
+                onClick={() => navigate('/market-prices')}
+              >
+                View All Prices
+              </Button>
             </div>
           </CardContent>
         </Card>
