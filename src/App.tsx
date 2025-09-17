@@ -13,6 +13,7 @@ import MarketPrices from "./pages/MarketPrices";
 import NotFound from "./pages/NotFound";
 import { LanguageProvider } from "./context/LanguageContext";
 import { VoiceProvider } from "./context/VoiceContext";
+import { LocationProvider } from "./context/LocationContext";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
     <TooltipProvider>
       <LanguageProvider>
         <VoiceProvider>
+          <LocationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -36,6 +38,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          </LocationProvider>
         </VoiceProvider>
       </LanguageProvider>
     </TooltipProvider>

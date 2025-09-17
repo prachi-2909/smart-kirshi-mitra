@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/context/LanguageContext';
 import { useVoice } from '@/context/VoiceContext';
-import { ArrowLeft, Mic, Send, Bot, User, Volume2, MessageCircle } from 'lucide-react';
+import { useLocation } from '@/context/LocationContext';
+import Voice3DButton from '@/components/Voice3DButton';
+import { ArrowLeft, Mic, Send, Bot, User, Volume2, MessageCircle, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Message {
@@ -18,6 +20,7 @@ const ChatBot = () => {
   const navigate = useNavigate();
   const { translate, language } = useLanguage();
   const { isListening, startListening, stopListening, speak, isSupported } = useVoice();
+  const { location } = useLocation();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -39,20 +42,28 @@ const ChatBot = () => {
 
   const generateBotResponse = (userMessage: string): string => {
     const message = userMessage.toLowerCase();
+    const userLocation = location ? `${location.city}, ${location.state}` : 'your area';
     
-    if (message.includes('pest') || message.includes('insect') || message.includes('bug')) {
-      return "For pest control, I recommend organic neem oil spray. Mix 2-3 ml neem oil per liter of water and spray in the evening. Also consider introducing beneficial insects like ladybugs.";
-    } else if (message.includes('fertilizer') || message.includes('nutrient')) {
-      return "For healthy crop growth, use a balanced NPK fertilizer (10:26:26) at the time of sowing, followed by urea application 30-40 days after germination. Organic compost is always beneficial.";
-    } else if (message.includes('water') || message.includes('irrigation')) {
-      return "Based on current weather conditions, I recommend irrigating every 3-4 days. Avoid overwatering as it can lead to root rot. Drip irrigation is most efficient for water conservation.";
-    } else if (message.includes('disease') || message.includes('fungus')) {
-      return "Common plant diseases can be prevented with proper spacing, good drainage, and fungicide application. If you see yellow or brown spots on leaves, it might be fungal - use copper-based fungicides.";
-    } else if (message.includes('yield') || message.includes('production')) {
-      return "To increase yield, focus on: 1) Proper soil testing and fertilization 2) Timely pest control 3) Adequate irrigation 4) Good quality seeds 5) Crop rotation practices.";
-    } else {
-      return "I understand your concern. For specific agricultural advice, I recommend consulting with local agricultural extension officers. Meanwhile, ensure proper crop care with timely watering, fertilization, and pest monitoring.";
+    if (message.includes('weather') || message.includes('rain') || message.includes('temperature')) {
+      return `Based on current weather data for ${userLocation}, expect partly cloudy conditions with 28°C temperature. Light rain is forecasted for tomorrow, which is perfect for your crops. Consider delaying irrigation today.`;
     }
+    if (message.includes('crop') || message.includes('farming') || message.includes('plant')) {
+      return `For optimal crop growth in ${userLocation}, ensure proper irrigation, use organic fertilizers, and monitor for pests. This season is ideal for tomatoes, cotton, and rice in your region. The local climate conditions are favorable.`;
+    }
+    if (message.includes('pest') || message.includes('insect') || message.includes('bug')) {
+      return `Common pests in ${userLocation} this season include aphids and whiteflies. Use neem oil spray or introduce beneficial insects like ladybugs. Regular monitoring is key for early detection.`;
+    }
+    if (message.includes('market') || message.includes('price') || message.includes('sell')) {
+      return `Current market prices in ${userLocation} mandis: Rice ₹2,100/quintal (+5%), Wheat ₹2,250/quintal (-2%), Cotton ₹6,800/quintal (+8%). Local demand is strong this week.`;
+    }
+    if (message.includes('fertilizer') || message.includes('nutrient') || message.includes('soil')) {
+      return `Your soil analysis for ${userLocation} shows good pH levels. Consider organic compost and NPK fertilizers suitable for local soil conditions. Avoid over-fertilization which can harm beneficial microorganisms.`;
+    }
+    if (message.includes('hello') || message.includes('hi') || message.includes('namaste')) {
+      return `Hello! Welcome to KrishiMitra AI Assistant. I'm here to help farmers in ${userLocation} with personalized farming advice, weather updates, and market information. How can I assist you today?`;
+    }
+    
+    return `I'm your AI farming assistant for ${userLocation}. I can help with weather updates, crop management, pest control, market prices, and local farming advice. What specific farming question can I assist you with?`;
   };
 
   const handleSendMessage = () => {
@@ -115,12 +126,20 @@ const ChatBot = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <MessageCircle className="w-8 h-8 animate-floating" />
+            <Bot className="w-8 h-8 animate-floating" />
             <div>
-              <h1 className="text-xl font-bold">{translate('chat')}</h1>
-              <p className="text-sm text-white/80">AI-powered farming assistant</p>
+              <h1 className="text-xl font-bold">KrishiMitra AI</h1>
+              <div className="flex items-center gap-1 text-sm text-white/80">
+                <MapPin className="w-3 h-3" />
+                <span>Farming assistant for {location?.city || 'your area'}</span>
+              </div>
             </div>
           </div>
+          <Voice3DButton
+            text={`AI Assistant is ready to help farmers in ${location?.city || 'your area'}. Ask me anything about farming, weather, or markets.`}
+            variant="speak"
+            className="ml-auto"
+          />
         </div>
       </div>
 
@@ -180,16 +199,14 @@ const ChatBot = () => {
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
           />
           
-          {isSupported && (
-            <Button
-              variant={isListening ? 'destructive' : 'default'}
-              size="lg"
-              onClick={handleVoiceInput}
-              className={`glow-effect transition-bounce ${isListening ? 'voice-pulse' : ''}`}
-            >
-              <Mic className="w-5 h-5" />
-            </Button>
-          )}
+          <Voice3DButton
+            text=""
+            variant="listen"
+            onListenResult={(result) => {
+              setInputText(result);
+              setTimeout(() => handleSendMessage(), 500);
+            }}
+          />
           
           <Button
             size="lg"

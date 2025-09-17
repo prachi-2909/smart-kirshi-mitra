@@ -6,6 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLanguage } from '@/context/LanguageContext';
+import { useLocation } from '@/context/LocationContext';
+import { useVoice } from '@/context/VoiceContext';
 import { 
   ArrowLeft, 
   Plus, 
@@ -15,7 +17,9 @@ import {
   User, 
   Award,
   Sprout,
-  Users
+  Users,
+  MapPin,
+  Volume2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,6 +39,8 @@ interface Post {
 const Community = () => {
   const navigate = useNavigate();
   const { translate } = useLanguage();
+  const { location } = useLocation();
+  const { speak } = useVoice();
   const [showNewPost, setShowNewPost] = useState(false);
   const [newPostContent, setNewPostContent] = useState('');
 
@@ -45,32 +51,55 @@ const Community = () => {
       avatar: 'RK',
       badge: 'Expert Farmer',
       timestamp: '2 hours ago',
-      content: 'Just harvested my organic tomatoes! Got 120% higher yield this season using drip irrigation and neem-based pest control. Happy to share my experience with fellow farmers.',
+      content: `Just harvested organic tomatoes in ${location?.city || 'our area'}! The yield this season has been exceptional. Using drip irrigation and natural fertilizers really made a difference.`,
       image: '/placeholder.svg',
       likes: 24,
       comments: 8,
-      tags: ['Organic', 'Tomato', 'Success']
+      tags: ['Organic', 'Tomatoes', 'Irrigation']
     },
     {
       id: '2',
       author: 'Priya Sharma',
       avatar: 'PS',
+      badge: 'Sustainable Farming',
       timestamp: '4 hours ago',
-      content: 'Seeing yellow spots on my cotton leaves. Started appearing after recent rainfall. Has anyone faced similar issues? What treatment worked for you?',
-      likes: 12,
-      comments: 15,
-      tags: ['Cotton', 'Disease', 'Help Needed']
+      content: `Weather forecast for ${location?.city || 'our area'} shows rain for the next 3 days. Perfect timing for planting monsoon crops. Who else in ${location?.state || 'the region'} is planning to start sowing?`,
+      likes: 18,
+      comments: 12,
+      tags: ['Weather', 'Monsoon', 'Planting']
     },
     {
       id: '3',
       author: 'Suresh Patel',
       avatar: 'SP',
-      badge: 'Sustainable Farmer',
-      timestamp: '1 day ago',
-      content: 'Attended the agricultural extension workshop on crop rotation. Learned about the benefits of legume-cereal rotation. Planning to implement this in the next season.',
+      badge: 'Cotton Specialist',
+      timestamp: '6 hours ago',
+      content: `Cotton prices in ${location?.state || 'Maharashtra'} markets are looking good! ₹6,800 per quintal. Planning to sell 50% of my stock at nearby mandi.`,
       likes: 31,
-      comments: 6,
-      tags: ['Learning', 'Crop Rotation', 'Workshop']
+      comments: 15,
+      tags: ['Cotton', 'Market', 'Prices']
+    },
+    {
+      id: '4',
+      author: 'Maya Devi',
+      avatar: 'MD',
+      timestamp: '1 day ago',
+      content: `Started a small kitchen garden here in ${location?.city || 'the city'}. Even small spaces can yield fresh produce for the family! Happy to share tips with neighbors.`,
+      image: '/placeholder.svg',
+      likes: 45,
+      comments: 22,
+      tags: ['Kitchen Garden', 'Herbs', 'Family']
+    },
+    {
+      id: '5',
+      author: 'Local Farmer Group',
+      avatar: 'LFG',
+      badge: 'Community Leader',
+      timestamp: '2 days ago',
+      content: `${location?.city || 'Local'} farmers meeting this Sunday at 10 AM. Discussing new government schemes and group buying of seeds. All welcome!`,
+      likes: 67,
+      comments: 34,
+      tags: ['Meeting', 'Government Schemes', 'Seeds']
     }
   ]);
 
@@ -93,34 +122,43 @@ const Community = () => {
     <div className="min-h-screen bg-gradient-soft">
       {/* Header */}
       <div className="bg-gradient-primary text-white p-4 shadow-3d">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/home')}
-              className="text-white hover:bg-white/20"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Users className="w-8 h-8 animate-floating" />
-              <div>
-                <h1 className="text-xl font-bold">{translate('community')}</h1>
-                <p className="text-sm text-white/80">Connect & Learn Together</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/home')}
+            className="text-white hover:bg-white/20"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Users className="w-8 h-8 animate-floating" />
+            <div>
+              <h1 className="text-xl font-bold">{translate('localCommunity')}</h1>
+              <div className="flex items-center gap-1 text-sm text-white/80">
+                <MapPin className="w-3 h-3" />
+                <span>{location?.city || 'Loading location...'}, {location?.state}</span>
               </div>
             </div>
           </div>
-          
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setShowNewPost(true)}
-            className="glow-effect"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Post
-          </Button>
+          <div className="flex gap-2 ml-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => speak(`Welcome to ${location?.city || 'local'} farming community. Connect with nearby farmers and share knowledge.`)}
+              className="text-white hover:bg-white/20"
+            >
+              <Volume2 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowNewPost(true)}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Post
+            </Button>
+          </div>
         </div>
       </div>
 

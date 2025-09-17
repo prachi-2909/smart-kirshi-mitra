@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/context/LanguageContext';
 import { useVoice } from '@/context/VoiceContext';
+import { useLocation } from '@/context/LocationContext';
+import { useGreeting } from '@/hooks/useGreeting';
+import CropMonitoringCard from '@/components/CropMonitoringCard';
 import { 
   Cloud, 
   CloudRain, 
@@ -17,7 +20,9 @@ import {
   Users, 
   Leaf,
   MapPin,
-  Mic
+  Mic,
+  RefreshCw,
+  Volume2
 } from 'lucide-react';
 
 interface WeatherData {
@@ -42,6 +47,8 @@ const Home = () => {
   const navigate = useNavigate();
   const { translate } = useLanguage();
   const { speak } = useVoice();
+  const { location, isLoading: locationLoading, refreshLocation } = useLocation();
+  const { speakWelcome, getTimeBasedGreeting } = useGreeting();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [marketPrices] = useState([
     { crop: 'Rice', price: 2100, change: '+5%', trend: 'up' },
@@ -50,24 +57,26 @@ const Home = () => {
   ]);
 
   useEffect(() => {
-    // Simulated weather data - in real app, fetch from weather API
-    const mockWeather: WeatherData = {
-      location: "Pune, Maharashtra",
-      current: {
-        temperature: 28,
-        humidity: 65,
-        condition: "Partly Cloudy",
-        icon: "partly-cloudy"
-      },
-      forecast: [
-        { day: "Today", high: 32, low: 24, condition: "Sunny", icon: "sunny", rainfall: 0 },
-        { day: "Tomorrow", high: 29, low: 22, condition: "Rainy", icon: "rainy", rainfall: 15 },
-        { day: "Day 3", high: 31, low: 25, condition: "Cloudy", icon: "cloudy", rainfall: 5 },
-        { day: "Day 4", high: 33, low: 26, condition: "Sunny", icon: "sunny", rainfall: 0 },
-      ]
-    };
-    setWeather(mockWeather);
-  }, []);
+    if (location) {
+      // Use real location data for weather
+      const mockWeather: WeatherData = {
+        location: `${location.city}, ${location.state}`,
+        current: {
+          temperature: 28,
+          humidity: 65,
+          condition: "Partly Cloudy",
+          icon: "partly-cloudy"
+        },
+        forecast: [
+          { day: "Today", high: 32, low: 24, condition: "Sunny", icon: "sunny", rainfall: 0 },
+          { day: "Tomorrow", high: 29, low: 22, condition: "Rainy", icon: "rainy", rainfall: 15 },
+          { day: "Day 3", high: 31, low: 25, condition: "Cloudy", icon: "cloudy", rainfall: 5 },
+          { day: "Day 4", high: 33, low: 26, condition: "Sunny", icon: "sunny", rainfall: 0 },
+        ]
+      };
+      setWeather(mockWeather);
+    }
+  }, [location]);
 
   const getWeatherIcon = (condition: string) => {
     switch (condition.toLowerCase()) {
@@ -91,20 +100,43 @@ const Home = () => {
       <div className="bg-gradient-primary text-white p-6 shadow-3d">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold">KrishiMitra</h1>
+            <h1 className="text-2xl font-bold floating">KrishiMitra</h1>
             <div className="flex items-center gap-2 text-white/80">
               <MapPin className="w-4 h-4" />
-              <span>{weather?.location}</span>
+              <span>
+                {locationLoading ? "Getting location..." : weather?.location}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={refreshLocation}
+                className="text-white/60 hover:text-white h-6 w-6 p-0"
+              >
+                <RefreshCw className="w-3 h-3" />
+              </Button>
+            </div>
+            <div className="text-white/60 text-sm">
+              {getTimeBasedGreeting()}
             </div>
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => speak("Welcome to your farming dashboard. Check weather, get crop advice, and connect with the community.")}
-            className="glow-effect"
-          >
-            <Mic className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={speakWelcome}
+              className="glow-effect"
+            >
+              <Volume2 className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => speak("Check weather, get crop advice, monitor your fields, and connect with the community.")}
+              className="glow-effect"
+            >
+              <Mic className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -216,26 +248,8 @@ const Home = () => {
           </CardContent>
         </Card>
 
-        {/* Soil Health Status */}
-        <Card className="card-3d animate-slide-up">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Thermometer className="w-6 h-6 text-primary" />
-              {translate('soilHealth')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between p-4 bg-gradient-card rounded-lg">
-              <div>
-                <div className="font-semibold text-lg">{translate('good')}</div>
-                <div className="text-sm text-muted-foreground">pH: 6.8 | N-P-K: Balanced</div>
-              </div>
-              <div className="w-16 h-16 bg-success rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-xl">85%</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Crop Monitoring */}
+        <CropMonitoringCard />
 
         {/* Action Buttons */}
         <div className="grid grid-cols-3 gap-4">
